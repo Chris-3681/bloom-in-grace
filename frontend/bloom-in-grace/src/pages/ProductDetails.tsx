@@ -12,8 +12,8 @@ function ProductDetails() {
   if (!product) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto px-6 py-20">
-          <h1 className="text-4xl font-bold">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <h1 className="text-4xl font-bold text-[#4A3F35]">
             Product Not Found
           </h1>
         </div>
@@ -23,26 +23,37 @@ function ProductDetails() {
 
   return (
     <Layout>
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-12">
+      <section className="max-w-7xl mx-auto px-6 py-16">
+
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
 
           {/* Product Image */}
           <div>
             <img
               src={product.image}
               alt={product.name}
-              className="w-full rounded-xl shadow-md"
+              className="w-full rounded-2xl shadow-lg"
             />
           </div>
 
-          {/* Product Information */}
+          {/* Product Info */}
           <div>
 
-            <h1 className="text-4xl font-bold text-[#4A3F35]">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#4A3F35]">
               {product.name}
             </h1>
 
-            <p className="mt-6 text-[#7B6F63] leading-relaxed">
+            <div className="flex flex-wrap gap-3 mt-6">
+              <span className="bg-[#F8F3EE] px-4 py-2 rounded-full text-sm">
+                Instant Download
+              </span>
+
+              <span className="bg-[#F8F3EE] px-4 py-2 rounded-full text-sm">
+                Printable PDF
+              </span>
+            </div>
+
+            <p className="mt-6 text-lg text-[#7B6F63] leading-relaxed">
               {product.description}
             </p>
 
@@ -58,7 +69,7 @@ function ProductDetails() {
                   What's Included
                 </h2>
 
-                <ul className="space-y-2 text-[#7B6F63]">
+                <ul className="space-y-3 text-[#7B6F63]">
                   {product.included.map((item, index) => (
                     <li key={index}>
                       ✓ {item}
@@ -68,32 +79,24 @@ function ProductDetails() {
               </div>
             )}
 
-            <div className="mt-8 flex gap-4 text-sm">
-              <span className="px-3 py-1 bg-[#F8F3EE] rounded-full">
-                Instant Download
-              </span>
+            <div className="mt-10">
+              <p className="text-4xl font-bold text-[#C9A66B]">
+                ${product.price}
+              </p>
 
-              <span className="px-3 py-1 bg-[#F8F3EE] rounded-full">
-                Printable PDF
-              </span>
+              <button className="mt-6 w-full md:w-auto px-10 py-4 bg-[#C9A66B] text-white rounded-xl font-semibold hover:opacity-90 transition">
+                Buy Now
+              </button>
             </div>
-
-            <p className="mt-8 text-4xl font-bold text-[#C9A66B]">
-              ${product.price}
-            </p>
-
-            <button className="mt-8 px-8 py-4 bg-[#C9A66B] text-white rounded-lg hover:opacity-90 transition">
-              Buy Now
-            </button>
 
           </div>
         </div>
 
-        {/* Preview Pages */}
+        {/* Preview Gallery */}
         {product.previews && (
-          <div className="mt-20">
+          <div className="mt-24">
 
-            <h2 className="text-3xl font-bold text-[#4A3F35] mb-8 text-center">
+            <h2 className="text-3xl font-bold text-[#4A3F35] text-center mb-10">
               Preview Pages
             </h2>
 
@@ -102,14 +105,15 @@ function ProductDetails() {
                 <img
                   key={index}
                   src={preview}
-                  alt={`Preview ${index + 1}`}
-                  className="rounded-xl border shadow-sm"
+                  alt={`${product.name} Preview ${index + 1}`}
+                  className="rounded-2xl shadow-md border"
                 />
               ))}
             </div>
 
           </div>
         )}
+
       </section>
     </Layout>
   );
