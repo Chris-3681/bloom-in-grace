@@ -1,4 +1,4 @@
-import type { Product } from "../types/Product";
+import type { Product } from "../types/product";
 
 import bibleStudyWorkbook from "../assets/products/bible-study-workbook.png";
 import gratitudeJournal from "../assets/products/gratitude-journal.png";
