@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import Layout from "../components/Layout";
 import { products } from "../data/products";
+import { Link } from "react-router-dom";
 
 function ProductDetails() {
   const { slug } = useParams();
@@ -84,9 +85,12 @@ function ProductDetails() {
                 ${product.price}
               </p>
 
-              <button className="mt-6 w-full md:w-auto px-10 py-4 bg-[#C9A66B] text-white rounded-xl font-semibold hover:opacity-90 transition">
-                Buy Now
-              </button>
+              <Link
+  to={`/checkout/${product.slug}`}
+  className="inline-block mt-6 px-8 py-3 bg-[#C9A66B] text-white rounded-lg hover:opacity-90"
+>
+  Buy Now
+</Link>
             </div>
 
           </div>

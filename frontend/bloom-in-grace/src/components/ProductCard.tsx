@@ -30,7 +30,7 @@ function ProductCard({ slug, name, price, description, image, }: Product) {
       </p>
 
       <Link
-  to={`/product/${slug}`}
+  to={`/shop/${slug}`}
   className="block mt-4 w-full text-center py-3 bg-[#C9A66B] text-white rounded-lg"
 >
   View Product

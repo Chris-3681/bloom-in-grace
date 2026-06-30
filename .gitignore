@@ -1,0 +1,43 @@
+# ==========================
+# Python
+# ==========================
+
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+**/venv/
+
+# Environment variables
+**/.env
+
+
+# ==========================
+# Node / React
+# ==========================
+
+**/node_modules/
+**/dist/
+
+
+# ==========================
+# Product PDFs
+# ==========================
+
+backend/bloom-in-grace-api/products/*.pdf
+
+
+# ==========================
+# OS files
+# ==========================
+
+.DS_Store
+Thumbs.db
+
+
+# ==========================
+# Logs
+# ==========================
+
+*.log
