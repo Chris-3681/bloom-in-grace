@@ -1,17 +1,18 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import Layout from "../components/Layout";
-import { products } from "../data/products";
-import PayPalButton from "../components/PayPalButton";
 
+import Layout from "../components/Layout";
+import PayPalButton from "../components/PayPalButton";
+import { products } from "../data/products";
 
 function Checkout() {
-  console.log(import.meta.env.VITE_PAYPAL_CLIENT_ID);
   const { slug } = useParams();
+
+  const [email, setEmail] = useState("");
 
   const product = products.find(
     (item) => item.slug === slug
   );
- 
 
   if (!product) {
     return (
@@ -57,8 +58,6 @@ function Checkout() {
                 ${product.price}
               </p>
 
-             
-
             </div>
 
           </div>
@@ -66,7 +65,32 @@ function Checkout() {
         </div>
 
         <div className="mt-10">
-          <PayPalButton slug={product.slug} />
+
+          <label className="block mb-2 font-medium text-[#4A3F35]">
+            Email Address
+          </label>
+
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border border-[#EFE7DE] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C9A66B]"
+          />
+
+          <p className="mt-2 text-sm text-gray-500">
+            Your download link and future purchases will be sent to this email.
+          </p>
+
+        </div>
+
+        <div className="mt-10">
+
+          <PayPalButton
+            slug={product.slug}
+            email={email}
+          />
+
         </div>
 
       </div>

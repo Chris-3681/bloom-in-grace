@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
 from services.token_service import generate_token
+from database import db
+from models import Purchase
 
 from services.paypal_service import (
     get_access_token,
@@ -77,6 +79,7 @@ def capture_paypal_order():
 
     order_id = data.get("orderID")
     slug = data.get("slug")
+    customer_email = data.get("email")
 
     if not order_id:
         return jsonify({
@@ -88,27 +91,70 @@ def capture_paypal_order():
             "error": "Missing product slug"
         }), 400
 
+    if not customer_email:
+        return jsonify({
+            "error": "Missing customer email"
+        }), 400
+
     try:
 
         result = capture_order(order_id)
 
-        # Ensure PayPal confirms the payment
         if result.get("status") != "COMPLETED":
-
             return jsonify({
                 "success": False,
                 "message": "Payment not completed."
             }), 400
 
-        token = generate_token(slug)
+        # -------------------------------
+        # Get PayPal email if available
+        # -------------------------------
+
+        paypal_email = None
+
+        payer = result.get("payer")
+
+        if payer:
+            paypal_email = payer.get("email_address")
+
+        # -------------------------------
+        # Prevent duplicate purchases
+        # -------------------------------
+
+        existing = Purchase.query.filter_by(
+            paypal_order_id=order_id
+        ).first()
+
+        if existing:
+
+            return jsonify({
+                "success": True,
+                "message": "Purchase already recorded."
+            })
+
+        # -------------------------------
+        # Save purchase
+        # -------------------------------
+
+        purchase = Purchase(
+            customer_email=customer_email,
+            paypal_email=paypal_email,
+            product_slug=slug,
+            paypal_order_id=order_id,
+            payment_status="COMPLETED"
+        )
+
+        db.session.add(purchase)
+        db.session.commit()
 
         return jsonify({
             "success": True,
-            "token": token,
-            "payment": result
+            "message": "Purchase saved successfully."
         })
 
     except Exception as e:
+
+        db.session.rollback()
 
         return jsonify({
             "success": False,
