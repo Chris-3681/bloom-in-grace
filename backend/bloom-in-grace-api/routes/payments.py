@@ -158,6 +158,12 @@ def capture_paypal_order():
 
         db.session.rollback()
 
+        print("CAPTURE ORDER ERROR:")
+        print(str(e))
+        import traceback
+        traceback.print_exc()
+
+
         return jsonify({
             "success": False,
             "error": str(e)
