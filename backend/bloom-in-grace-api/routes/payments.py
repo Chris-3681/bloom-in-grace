@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from services.token_service import generate_token
+
 from database import db
 from models import Purchase
+from services.token_service import generate_token
 
 from services.paypal_service import (
     get_access_token,
@@ -72,6 +73,8 @@ def create_paypal_order():
         return jsonify({
             "error": str(e)
         }), 500
+
+
 @payments_bp.route("/capture-paypal-order", methods=["POST"])
 def capture_paypal_order():
 
@@ -106,20 +109,11 @@ def capture_paypal_order():
                 "message": "Payment not completed."
             }), 400
 
-        # -------------------------------
-        # Get PayPal email if available
-        # -------------------------------
-
-        paypal_email = None
-
         payer = result.get("payer")
+        paypal_email = None
 
         if payer:
             paypal_email = payer.get("email_address")
-
-        # -------------------------------
-        # Prevent duplicate purchases
-        # -------------------------------
 
         existing = Purchase.query.filter_by(
             paypal_order_id=order_id
@@ -127,14 +121,16 @@ def capture_paypal_order():
 
         if existing:
 
+            token = generate_token(
+                existing.customer_email,
+                existing.product_slug
+            )
+
             return jsonify({
                 "success": True,
-                "message": "Purchase already recorded."
+                "message": "Purchase already recorded.",
+                "token": token
             })
-
-        # -------------------------------
-        # Save purchase
-        # -------------------------------
 
         purchase = Purchase(
             customer_email=customer_email,
@@ -147,9 +143,15 @@ def capture_paypal_order():
         db.session.add(purchase)
         db.session.commit()
 
+        token = generate_token(
+            customer_email,
+            slug
+        )
+
         return jsonify({
             "success": True,
-            "message": "Purchase saved successfully."
+            "message": "Purchase saved successfully.",
+            "token": token
         })
 
     except Exception as e:
