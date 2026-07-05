@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { PayPalButtons } from "@paypal/react-paypal-js";
-
 import API_URL from "../config/api";
 
 type PayPalButtonProps = {
@@ -18,8 +17,6 @@ function PayPalButton({
 
   return (
     <PayPalButtons
-      disabled={!email}
-
       style={{
         layout: "vertical",
         color: "gold",
@@ -29,11 +26,15 @@ function PayPalButton({
 
       createOrder={async () => {
 
+        if (!email.trim()) {
+          alert("Please enter your email before continuing.");
+          throw new Error("Missing email");
+        }
+
         const response = await axios.post(
           `${API_URL}/create-paypal-order`,
           {
             slug,
-            email,
           }
         );
 
@@ -51,22 +52,22 @@ function PayPalButton({
           }
         );
 
-        navigate("/success");
+        if (response.data.success) {
+          navigate("/success");
+        } else {
+          alert(response.data.error || "Payment failed.");
+        }
 
       }}
 
       onCancel={() => {
-
         navigate("/cancel");
-
       }}
 
       onError={(err) => {
-
         console.error("PayPal Error:", err);
-
+        alert("Something went wrong while processing your payment.");
       }}
-
     />
   );
 }
