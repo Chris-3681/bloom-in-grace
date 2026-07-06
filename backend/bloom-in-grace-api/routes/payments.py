@@ -121,10 +121,7 @@ def capture_paypal_order():
 
         if existing:
 
-            token = generate_token(
-                existing.customer_email,
-                existing.product_slug
-            )
+            token = generate_token(slug)
 
             return jsonify({
                 "success": True,
@@ -143,10 +140,7 @@ def capture_paypal_order():
         db.session.add(purchase)
         db.session.commit()
 
-        token = generate_token(
-            customer_email,
-            slug
-        )
+        token = generate_token(slug)
 
         return jsonify({
             "success": True,

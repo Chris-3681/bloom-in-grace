@@ -27,6 +27,11 @@ class Purchase(db.Model):
         unique=True,
         nullable=False
     )
+    download_token = db.Column(
+    db.String(100),
+    unique=True,
+    nullable=False
+)
 
     payment_status = db.Column(
         db.String(30),
@@ -37,3 +42,4 @@ class Purchase(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+    
