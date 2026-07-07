@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
+import secrets
 
 from database import db
 from models import Purchase
-from services.token_service import generate_token
 
 from services.paypal_service import (
     get_access_token,
@@ -119,33 +119,32 @@ def capture_paypal_order():
             paypal_order_id=order_id
         ).first()
 
+        # Purchase already exists
         if existing:
-
-            token = generate_token(slug)
 
             return jsonify({
                 "success": True,
-                "message": "Purchase already recorded.",
-                "token": token
+                "download_token": existing.download_token
             })
+
+        # Generate a permanent download token
+        download_token = secrets.token_urlsafe(32)
 
         purchase = Purchase(
             customer_email=customer_email,
             paypal_email=paypal_email,
             product_slug=slug,
             paypal_order_id=order_id,
+            download_token=download_token,
             payment_status="COMPLETED"
         )
 
         db.session.add(purchase)
         db.session.commit()
 
-        token = generate_token(slug)
-
         return jsonify({
             "success": True,
-            "message": "Purchase saved successfully.",
-            "token": token
+            "download_token": download_token
         })
 
     except Exception as e:
@@ -153,10 +152,8 @@ def capture_paypal_order():
         db.session.rollback()
 
         print("CAPTURE ORDER ERROR:")
-        print(str(e))
         import traceback
         traceback.print_exc()
-
 
         return jsonify({
             "success": False,

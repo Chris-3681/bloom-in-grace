@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 
 from routes.products import products_bp
 from routes.downloads import downloads_bp
-from routes.tokens import tokens_bp
 from routes.payments import payments_bp
 
 load_dotenv()
@@ -34,7 +33,6 @@ CORS(
 
 app.register_blueprint(products_bp)
 app.register_blueprint(downloads_bp)
-app.register_blueprint(tokens_bp)
 app.register_blueprint(payments_bp)
 
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, send_from_directory, jsonify
 from data.products import PRODUCTS
-from services.token_service import validate_token
+from models import Purchase
 import os
 
 downloads_bp = Blueprint("downloads", __name__)
@@ -14,15 +14,20 @@ PRODUCTS_FOLDER = os.path.join(
 @downloads_bp.route("/download/<token>", methods=["GET"])
 def download_product(token):
 
-    slug = validate_token(token)
+    purchase = Purchase.query.filter_by(
+        download_token=token
+    ).first()
 
-    if not slug:
+    if not purchase:
         return jsonify({
             "error": "Invalid download token"
         }), 403
 
     product = next(
-        (p for p in PRODUCTS if p["slug"] == slug),
+        (
+            p for p in PRODUCTS
+            if p["slug"] == purchase.product_slug
+        ),
         None
     )
 
