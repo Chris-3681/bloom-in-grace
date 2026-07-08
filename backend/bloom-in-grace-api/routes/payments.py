@@ -34,6 +34,24 @@ def paypal_test():
             "error": str(e)
         }), 500
 
+@payments_bp.route("/db-test")
+def db_test():
+
+    try:
+
+        db.session.execute(db.text("SELECT 1"))
+
+        return {
+            "success": True
+        }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }, 500
+
 
 @payments_bp.route("/create-paypal-order", methods=["POST"])
 def create_paypal_order():
