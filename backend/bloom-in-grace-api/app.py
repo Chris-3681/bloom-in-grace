@@ -1,31 +1,49 @@
 import os
-from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+from flask import Flask
+from flask_cors import CORS
+import os
+from database import init_db, db
+from models import Purchase
+from dotenv import load_dotenv
 
-def init_db(app):
+from routes.products import products_bp
+from routes.downloads import downloads_bp
+from routes.payments import payments_bp
 
-    database_url = os.getenv("DATABASE_URL")
+load_dotenv()
+print(os.getenv("DATABASE_URL"))
 
-    if not database_url:
-        raise RuntimeError("DATABASE_URL not found")
+app = Flask(__name__)
+init_db(app)
 
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace(
-            "postgres://",
-            "postgresql://",
-            1
-        )
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5173"
+)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": FRONTEND_URL
+        }
+    }
+)
 
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.register_blueprint(products_bp)
+app.register_blueprint(downloads_bp)
+app.register_blueprint(payments_bp)
 
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "pool_pre_ping": True,
-        "pool_recycle": 280,
-        "pool_size": 5,
-        "max_overflow": 10
+
+@app.route("/")
+def home():
+    return {
+        "message": "Bloom in Grace API is running"
     }
 
-    db.init_app(app)
+with app.app_context():
+    db.create_all()
+
+if __name__ == "__main__":
+    app.run(debug=True)

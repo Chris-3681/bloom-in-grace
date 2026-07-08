@@ -1,13 +1,14 @@
 import os
-
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 def init_db(app):
 
     database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise RuntimeError("DATABASE_URL not found")
 
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
@@ -22,7 +23,7 @@ def init_db(app):
 
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "pool_pre_ping": True,
-        "pool_recycle": 300
+        "pool_recycle": 280,
     }
 
     db.init_app(app)
