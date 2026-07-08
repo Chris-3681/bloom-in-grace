@@ -43,19 +43,43 @@ function PayPalButton({
 
       onApprove={async (data) => {
 
-        const response = await axios.post(
-          `${API_URL}/capture-paypal-order`,
-          {
-            orderID: data.orderID,
-            slug,
-            email,
-          }
-        );
+        try {
 
-        if (response.data.success) {
+          const response = await axios.post(
+            `${API_URL}/capture-paypal-order`,
+            {
+              orderID: data.orderID,
+              slug,
+              email,
+            }
+          );
+
+          const {
+            success,
+            download_token,
+            error
+          } = response.data;
+
+          if (!success) {
+            alert(error || "Payment failed.");
+            return;
+          }
+
+          // Store token only for this browser session
+          sessionStorage.setItem(
+            "download_token",
+            download_token
+          );
+
           navigate("/success");
-        } else {
-          alert(response.data.error || "Payment failed.");
+
+        } catch (err) {
+
+          console.error(err);
+
+          alert(
+            "Something went wrong while confirming your payment."
+          );
         }
 
       }}
