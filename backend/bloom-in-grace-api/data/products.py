@@ -1,9 +1,3 @@
-from flask import Blueprint, jsonify
-from data import products
-
-
-products_bp = Blueprint("products", __name__)
-
 PRODUCTS = [
     {
         "id": 1,
@@ -13,9 +7,7 @@ PRODUCTS = [
         "price": 9.99,
         "type": "single",
         "category": "bible-study",
-        "files": [
-            "bible-study-workbook.pdf"
-        ],
+        "download_url": "https://drive.google.com/uc?export=download&id=10ojZoaAK4HlWLjfgutxYQTsLMnJE06Bz",
         "is_active": True
     },
 
@@ -27,9 +19,7 @@ PRODUCTS = [
         "price": 7.99,
         "type": "single",
         "category": "gratitude",
-        "files": [
-            "gratitude-journal.pdf"
-        ],
+        "download_url": "https://drive.google.com/uc?export=download&id=1oZRqriHFjr1b78h7qKNXXydMRnJhEmE3",
         "is_active": True
     },
 
@@ -41,9 +31,7 @@ PRODUCTS = [
         "price": 6.99,
         "type": "single",
         "category": "scripture-memory",
-        "files": [
-            "scripture-memory-pages.pdf"
-        ],
+        "download_url": "https://drive.google.com/uc?export=download&id=1U4qlRHkIXwB4gsMH7_sshr9OqTk7Ebpd",
         "is_active": True
     },
 
@@ -55,13 +43,7 @@ PRODUCTS = [
         "price": 4.99,
         "type": "single",
         "category": "prayer",
-        "files": [
-            "prayer-tracker.pdf"
-        ],
+        "download_url": "https://drive.google.com/uc?export=download&id=10cvs6tEX_PO8HroWanQIEFem3J_OziTU",
         "is_active": True
     }
 ]
-
-@products_bp.route("/products", methods=["GET"])
-def get_products():
-    return jsonify(PRODUCTS)
