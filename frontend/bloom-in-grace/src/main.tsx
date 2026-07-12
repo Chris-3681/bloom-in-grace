@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Toaster } from "react-hot-toast"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
  <React.StrictMode>
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       }}
     >
       <App />
+      <Toaster position="top-center" />
     </PayPalScriptProvider>
   </BrowserRouter>
 </React.StrictMode>
