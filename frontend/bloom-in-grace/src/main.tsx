@@ -7,6 +7,7 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Toaster } from "react-hot-toast"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
+  console.log("PayPal Client ID:", import.meta.env.VITE_PAYPAL_CLIENT_ID);
  <React.StrictMode>
   <BrowserRouter>
     <PayPalScriptProvider
