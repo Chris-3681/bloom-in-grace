@@ -16,7 +16,7 @@ PRODUCTS = [
         "slug": "gratitude-journal",
         "name": "30-Day Gratitude Journal for Women",
         "description": "Develop a habit of thankfulness through daily guided reflections.",
-        "price": 7.99,
+        "price" : 0.50,
         "type": "single",
         "category": "gratitude",
         "download_url": "https://drive.google.com/uc?export=download&id=1oZRqriHFjr1b78h7qKNXXydMRnJhEmE3",
