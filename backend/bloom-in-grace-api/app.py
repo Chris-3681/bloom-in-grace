@@ -5,7 +5,6 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from database import init_db, db
-from extensions import mail
 
 from routes.products import products_bp
 from routes.downloads import downloads_bp
@@ -41,7 +40,7 @@ def create_app():
         os.getenv("GMAIL_EMAIL")
     )
 
-    mail.init_app(app)
+
 
     # --------------------------------------------------
     # CORS
