@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import Layout from "../components/Layout";
+import LemonCheckoutButton from "../components/LemonCheckoutButton";
 import { products } from "../data/products";
-import PayPalButton from "../components/PayPalButton";
 
 function Checkout() {
   const { slug } = useParams();
@@ -85,10 +85,10 @@ function Checkout() {
 
         <div className="mt-10">
 
-          <PayPalButton
-            slug={product.slug}
-            email={email}
-          />
+        <LemonCheckoutButton
+    slug={product.slug}
+    email={email}
+/>
 
         </div>
 

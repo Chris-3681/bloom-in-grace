@@ -6,69 +6,69 @@ import traceback
 from database import db
 from models import Purchase
 
-from services.paypal_service import (
-    get_access_token,
-    create_order,
-    capture_order
+from services.lemonsqueezy_service import (
+    create_checkout,
+    verify_signature
+)
+
+from services.email_service import (
+    send_customer_receipt,
+    send_admin_notification
 )
 
 from data.products import PRODUCTS
 
-payments_bp = Blueprint("payments", __name__)
+payments_bp = Blueprint(
+    "payments",
+    __name__
+)
 
 
 # ==========================================================
-# PAYPAL TEST
+# HELPERS
 # ==========================================================
-@payments_bp.route("/paypal/test", methods=["GET"])
-def paypal_test():
 
-    try:
+def get_product(slug):
 
-        token = get_access_token()
+    return next(
 
-        return jsonify({
-            "success": True,
-            "token_received": bool(token)
-        })
+        (
+            product
+            for product in PRODUCTS
+            if product["slug"] == slug
+        ),
 
-    except Exception as e:
+        None
 
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+    )
 
 
-# ==========================================================
-# DATABASE TEST
-# ==========================================================
-@payments_bp.route("/db-test", methods=["GET"])
-def db_test():
+def generate_receipt_number():
 
-    try:
+    today = datetime.utcnow().strftime("%Y%m%d")
 
-        db.session.execute(db.text("SELECT 1"))
+    latest = (
 
-        return jsonify({
-            "success": True
-        })
+        Purchase.query
+        .order_by(Purchase.id.desc())
+        .first()
 
-    except Exception as e:
+    )
 
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+    next_id = latest.id + 1 if latest else 1
+
+    return f"BG-{today}-{next_id:06d}"
 
 
 # ==========================================================
-# CREATE PAYPAL ORDER
+# CREATE LEMON SQUEEZY CHECKOUT
 # ==========================================================
-@payments_bp.route("/create-paypal-order", methods=["POST"])
-def create_paypal_order():
 
-    print("\n========== CREATE PAYPAL ORDER ==========")
+@payments_bp.route(
+    "/create-checkout",
+    methods=["POST"]
+)
+def create_lemon_checkout():
 
     try:
 
@@ -79,128 +79,185 @@ def create_paypal_order():
         if not slug:
 
             return jsonify({
+
+                "success": False,
+
                 "error": "Missing product slug."
+
             }), 400
 
-        product = next(
-            (
-                p
-                for p in PRODUCTS
-                if p["slug"] == slug
-            ),
-            None
-        )
+        product = get_product(slug)
 
         if not product:
 
             return jsonify({
+
+                "success": False,
+
                 "error": "Product not found."
+
             }), 404
 
-        print("Product:", product["name"])
+        checkout = create_checkout(product)
 
-        order = create_order(product)
+        checkout_url = checkout["data"]["attributes"]["url"]
 
-        print("PayPal Order:", order["id"])
+        return jsonify({
 
-        return jsonify(order)
+            "success": True,
+
+            "checkout_url": checkout_url
+
+        })
 
     except Exception as e:
 
-        print("\nCREATE ORDER ERROR")
         traceback.print_exc()
 
         return jsonify({
+
             "success": False,
+
             "error": str(e)
+
         }), 500
 
 
 # ==========================================================
-# CAPTURE PAYPAL ORDER
+# LEMON SQUEEZY WEBHOOK
 # ==========================================================
-@payments_bp.route("/capture-paypal-order", methods=["POST"])
-def capture_paypal_order():
+
+@payments_bp.route(
+    "/webhook",
+    methods=["POST"]
+)
+def lemonsqueezy_webhook():
 
     try:
 
-        data = request.get_json()
+        raw_body = request.data
 
-        order_id = data.get("orderID")
-        slug = data.get("slug")
-        customer_email = data.get("email")
+        signature = request.headers.get(
+            "X-Signature",
+            ""
+        )
 
-        if not order_id:
-
-            return jsonify({
-                "error": "Missing PayPal Order ID."
-            }), 400
-
-        if not slug:
+        if not verify_signature(
+            raw_body,
+            signature
+        ):
 
             return jsonify({
-                "error": "Missing product slug."
-            }), 400
 
-        if not customer_email:
-
-            return jsonify({
-                "error": "Missing customer email."
-            }), 400
-
-        # --------------------------------------
-        # Capture payment from PayPal
-        # --------------------------------------
-
-        result = capture_order(order_id)
-
-        if result.get("status") != "COMPLETED":
-
-            return jsonify({
                 "success": False,
-                "message": "Payment not completed."
-            }), 400
 
-        payer = result.get("payer", {})
+                "error": "Invalid signature."
 
-        paypal_email = payer.get("email_address")
+            }), 403
 
-        # --------------------------------------
-        # Check if purchase already exists
-        # --------------------------------------
+        payload = request.get_json()
+
+        event = request.headers.get(
+            "X-Event-Name",
+            ""
+        )
+
+        if event != "order_created":
+
+            return jsonify({
+
+                "success": True,
+
+                "message": "Ignored."
+
+            })
+
+        order = payload["data"]["attributes"]
+
+        customer_name = order.get(
+            "user_name",
+            "Customer"
+        )
+
+        customer_email = order.get(
+            "user_email"
+        )
+
+        provider_order_id = str(
+            payload["data"]["id"]
+        )
+
+        amount_paid = float(
+            order["total"]
+        ) / 100
+
+        currency = order["currency"]
+
+        custom = order.get(
+            "first_order_item",
+            {}
+        ).get(
+            "custom_data",
+            {}
+        )
+
+        slug = custom.get("slug")
+
+        product = get_product(slug)
+
+        if not product:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "Unknown product."
+
+            }), 404
 
         existing = Purchase.query.filter_by(
-            paypal_order_id=order_id
+
+            provider_order_id=provider_order_id
+
         ).first()
 
         if existing:
 
-            print("Purchase already exists.")
-
             return jsonify({
-                "success": True,
-                "download_token": existing.download_token
-            })
 
-        # --------------------------------------
-        # Generate secure token
-        # --------------------------------------
+                "success": True,
+
+                "message": "Already processed."
+
+            })
+            
+        receipt_number = generate_receipt_number()
 
         download_token = secrets.token_urlsafe(32)
 
         purchase = Purchase(
 
-            customer_email=customer_email,
+            receipt_number=receipt_number,
 
-            paypal_email=paypal_email,
+            payment_provider="Lemon Squeezy",
+
+            provider_order_id=provider_order_id,
+
+            customer_name=customer_name,
+
+            customer_email=customer_email,
 
             product_slug=slug,
 
-            paypal_order_id=order_id,
+            amount_paid=amount_paid,
+
+            currency=currency,
 
             download_token=download_token,
 
             payment_status="COMPLETED",
+
+            purchase_date=datetime.utcnow(),
 
             token_expires=datetime.utcnow() + timedelta(days=7),
 
@@ -214,13 +271,80 @@ def capture_paypal_order():
 
         db.session.commit()
 
-        print("Purchase saved.")
+        download_url = (
+
+            request.host_url.rstrip("/")
+
+            + "/download/"
+
+            + download_token
+
+        )
+
+        try:
+
+            send_customer_receipt(
+
+                customer_email=customer_email,
+
+                customer_name=customer_name,
+
+                receipt_number=receipt_number,
+
+                product_name=product["name"],
+
+                amount=amount_paid,
+
+                currency=currency,
+
+                purchase_date=purchase.purchase_date,
+
+                download_url=download_url,
+
+                downloads_remaining=purchase.max_downloads,
+
+                expiry_date=purchase.token_expires
+
+            )
+
+        except Exception:
+
+            traceback.print_exc()
+
+        try:
+
+            send_admin_notification(
+
+                receipt_number=receipt_number,
+
+                customer_name=customer_name,
+
+                customer_email=customer_email,
+
+                payment_provider="Lemon Squeezy",
+
+                provider_order_id=provider_order_id,
+
+                product_name=product["name"],
+
+                amount=amount_paid,
+
+                currency=currency,
+
+                purchase_date=purchase.purchase_date
+
+
+            )
+
+        except Exception:
+
+            traceback.print_exc()
 
         return jsonify({
 
             "success": True,
 
-            "download_token": download_token
+            "message": "Webhook processed."
 
         })
 
@@ -228,7 +352,6 @@ def capture_paypal_order():
 
         db.session.rollback()
 
-        print("\nCAPTURE ORDER ERROR")
         traceback.print_exc()
 
         return jsonify({

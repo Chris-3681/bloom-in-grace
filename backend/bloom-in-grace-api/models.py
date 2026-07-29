@@ -11,14 +11,33 @@ class Purchase(db.Model):
         primary_key=True
     )
 
-    customer_email = db.Column(
+    receipt_number = db.Column(
+        db.String(50),
+        unique=True,
+        nullable=False,
+        index=True
+    )
+
+    payment_provider = db.Column(
+        db.String(50),
+        nullable=False
+    )
+
+    provider_order_id = db.Column(
+        db.String(150),
+        unique=True,
+        nullable=False,
+        index=True
+    )
+
+    customer_name = db.Column(
         db.String(255),
         nullable=False
     )
 
-    paypal_email = db.Column(
+    customer_email = db.Column(
         db.String(255),
-        nullable=True
+        nullable=False
     )
 
     product_slug = db.Column(
@@ -26,15 +45,19 @@ class Purchase(db.Model):
         nullable=False
     )
 
-    paypal_order_id = db.Column(
-        db.String(100),
-        unique=True,
+    amount_paid = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    currency = db.Column(
+        db.String(10),
         nullable=False,
-        index=True
+        default="USD"
     )
 
     download_token = db.Column(
-        db.String(100),
+        db.String(120),
         unique=True,
         nullable=False,
         index=True
@@ -43,7 +66,7 @@ class Purchase(db.Model):
     payment_status = db.Column(
         db.String(30),
         nullable=False,
-        default="COMPLETED"
+        default="PAID"
     )
 
     purchase_date = db.Column(
@@ -51,10 +74,6 @@ class Purchase(db.Model):
         nullable=False,
         default=datetime.utcnow
     )
-
-    # --------------------------------------------------
-    # Download Security
-    # --------------------------------------------------
 
     token_expires = db.Column(
         db.DateTime,
@@ -73,27 +92,64 @@ class Purchase(db.Model):
         default=5
     )
 
+    @property
+    def downloads_remaining(self):
+
+        return max(
+            self.max_downloads - self.download_count,
+            0
+        )
+
     def to_dict(self):
 
         return {
+
             "id": self.id,
+
+            "receipt_number": self.receipt_number,
+
+            "payment_provider": self.payment_provider,
+
+            "provider_order_id": self.provider_order_id,
+
+            "customer_name": self.customer_name,
+
             "customer_email": self.customer_email,
-            "paypal_email": self.paypal_email,
+
             "product_slug": self.product_slug,
-            "paypal_order_id": self.paypal_order_id,
+
+            "amount_paid": self.amount_paid,
+
+            "currency": self.currency,
+
             "download_token": self.download_token,
+
             "payment_status": self.payment_status,
-            "purchase_date": self.purchase_date.isoformat() if self.purchase_date else None,
-            "token_expires": self.token_expires.isoformat() if self.token_expires else None,
+
+            "purchase_date": self.purchase_date.isoformat()
+            if self.purchase_date
+            else None,
+
+            "token_expires": self.token_expires.isoformat()
+            if self.token_expires
+            else None,
+
             "download_count": self.download_count,
-            "max_downloads": self.max_downloads
+
+            "max_downloads": self.max_downloads,
+
+            "downloads_remaining": self.downloads_remaining
+
         }
 
     def __repr__(self):
 
         return (
+
             f"<Purchase "
-            f"id={self.id}, "
-            f"email={self.customer_email}, "
-            f"product={self.product_slug}>"
+
+            f"{self.receipt_number} "
+
+            f"{self.customer_email}>"
+
         )

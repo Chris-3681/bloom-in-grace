@@ -73,7 +73,7 @@ function Footer() {
             </h4>
 
             <p className="text-gray-300">
-              bloomingrace.org@gmail.com
+            bloomingrace.ke@gmail.com
             </p>
 
             <p className="text-gray-300 mt-2">

@@ -2,48 +2,87 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
-import os
-from database import init_db, db
-from models import Purchase
 from dotenv import load_dotenv
+
+from database import init_db, db
+from extensions import mail
 
 from routes.products import products_bp
 from routes.downloads import downloads_bp
 from routes.payments import payments_bp
 
 load_dotenv()
-print(os.getenv("DATABASE_URL"))
 
-app = Flask(__name__)
-init_db(app)
 
-FRONTEND_URL = os.getenv(
-    "FRONTEND_URL",
-    "http://localhost:5173"
-)
+def create_app():
 
-CORS(
-    app,
-    resources={
-        r"/*": {
-            "origins": FRONTEND_URL
+    app = Flask(__name__)
+
+    # --------------------------------------------------
+    # Database
+    # --------------------------------------------------
+
+    init_db(app)
+
+    # --------------------------------------------------
+    # Mail
+    # --------------------------------------------------
+
+    app.config["MAIL_SERVER"] = "smtp.gmail.com"
+    app.config["MAIL_PORT"] = 587
+    app.config["MAIL_USE_TLS"] = True
+    app.config["MAIL_USE_SSL"] = False
+
+    app.config["MAIL_USERNAME"] = os.getenv("GMAIL_EMAIL")
+    app.config["MAIL_PASSWORD"] = os.getenv("GMAIL_APP_PASSWORD")
+
+    app.config["MAIL_DEFAULT_SENDER"] = (
+        "Bloom in Grace",
+        os.getenv("GMAIL_EMAIL")
+    )
+
+    mail.init_app(app)
+
+    # --------------------------------------------------
+    # CORS
+    # --------------------------------------------------
+
+    FRONTEND_URL = os.getenv(
+        "FRONTEND_URL",
+        "http://localhost:5173"
+    )
+
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": FRONTEND_URL
+            }
         }
-    }
-)
+    )
 
-app.register_blueprint(products_bp)
-app.register_blueprint(downloads_bp)
-app.register_blueprint(payments_bp)
+    # --------------------------------------------------
+    # Routes
+    # --------------------------------------------------
+
+    app.register_blueprint(products_bp)
+    app.register_blueprint(downloads_bp)
+    app.register_blueprint(payments_bp)
+
+    @app.route("/")
+    def home():
+
+        return {
+            "message": "Bloom in Grace API running."
+        }
+
+    with app.app_context():
+        db.create_all()
+
+    return app
 
 
-@app.route("/")
-def home():
-    return {
-        "message": "Bloom in Grace API is running"
-    }
-
-with app.app_context():
-    db.create_all()
+app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)

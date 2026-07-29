@@ -1,15 +1,24 @@
 import os
+
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-def init_db(app):
+
+def init_db(app: Flask) -> None:
+    """
+    Configure and initialize the SQLAlchemy database.
+    """
 
     database_url = os.getenv("DATABASE_URL")
 
     if not database_url:
-        raise RuntimeError("DATABASE_URL not found")
+        raise RuntimeError(
+            "DATABASE_URL environment variable is missing."
+        )
 
+    # Older providers sometimes use postgres://
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
             "postgres://",
