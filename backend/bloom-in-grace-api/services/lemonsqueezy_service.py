@@ -54,14 +54,6 @@ def create_checkout(product):
 
                 },
 
-                "enabled_variants": [
-
-    int(product["variant_id"])
-
-],
-
-                    "redirect_url": f"{FRONTEND_URL}/success"
-
                 }
 
             },
