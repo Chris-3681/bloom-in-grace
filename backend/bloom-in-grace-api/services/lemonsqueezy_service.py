@@ -86,7 +86,7 @@ def create_checkout(product):
 
                         "type": "variants",
 
-                        "id": str(LEMONSQUEEZY_VARIANT_ID)
+                        "id": str(product["variant_id"])
 
                     }
 
