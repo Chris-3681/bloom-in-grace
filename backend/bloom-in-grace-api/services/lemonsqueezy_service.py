@@ -96,7 +96,7 @@ def create_checkout(product):
 
         }
 
-    }
+    
 
     response = requests.post(
 
