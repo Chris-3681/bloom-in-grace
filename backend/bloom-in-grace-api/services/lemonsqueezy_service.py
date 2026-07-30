@@ -9,7 +9,6 @@ load_dotenv()
 
 LEMONSQUEEZY_API_KEY = os.getenv("LEMONSQUEEZY_API_KEY")
 LEMONSQUEEZY_STORE_ID = os.getenv("LEMONSQUEEZY_STORE_ID")
-LEMONSQUEEZY_VARIANT_ID = os.getenv("LEMONSQUEEZY_VARIANT_ID")
 LEMONSQUEEZY_WEBHOOK_SECRET = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 
@@ -55,13 +54,11 @@ def create_checkout(product):
 
                 },
 
-                "product_options": {
+                "enabled_variants": [
 
-                    "enabled_variants": [
+    int(product["variant_id"])
 
-                        int(LEMONSQUEEZY_VARIANT_ID)
-
-                    ],
+],
 
                     "redirect_url": f"{FRONTEND_URL}/success"
 
@@ -77,7 +74,7 @@ def create_checkout(product):
 
                         "type": "stores",
 
-                        "id": str(LEMONSQUEEZY_STORE_ID)
+                        "id": str(product["variant_id"])
 
                     }
 
