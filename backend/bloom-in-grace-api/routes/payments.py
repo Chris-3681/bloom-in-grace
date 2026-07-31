@@ -154,6 +154,7 @@ def lemonsqueezy_webhook():
             }), 403
 
         payload = request.get_json()
+        print("Slug =", payload["meta"]["custom_data"]["slug"])
 
         event = payload["meta"]["event_name"]
 
@@ -188,15 +189,7 @@ def lemonsqueezy_webhook():
 
         currency = order["currency"]
 
-        custom = order.get(
-            "first_order_item",
-            {}
-        ).get(
-            "custom_data",
-            {}
-        )
-
-        slug = custom.get("slug")
+        slug = payload["meta"]["custom_data"]["slug"]
 
         product = get_product(slug)
 
