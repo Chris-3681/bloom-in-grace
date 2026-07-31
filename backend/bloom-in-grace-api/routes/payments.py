@@ -129,6 +129,7 @@ def create_lemon_checkout():
 
 @payments_bp.route("/api/lemonsqueezy/webhook", methods=["POST"])
 def lemonsqueezy_webhook():
+    print("WEBHOOK RECEIVED")
 
     try:
 
