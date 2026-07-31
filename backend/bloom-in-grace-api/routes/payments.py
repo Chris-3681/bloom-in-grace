@@ -127,10 +127,7 @@ def create_lemon_checkout():
 # LEMON SQUEEZY WEBHOOK
 # ==========================================================
 
-@payments_bp.route(
-    "/webhook",
-    methods=["POST"]
-)
+@payments_bp.route("/api/lemonsqueezy/webhook", methods=["POST"])
 def lemonsqueezy_webhook():
 
     try:
@@ -157,10 +154,7 @@ def lemonsqueezy_webhook():
 
         payload = request.get_json()
 
-        event = request.headers.get(
-            "X-Event-Name",
-            ""
-        )
+        event = payload["meta"]["event_name"]
 
         if event != "order_created":
 
