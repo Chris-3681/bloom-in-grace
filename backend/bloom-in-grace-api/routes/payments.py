@@ -5,6 +5,7 @@ import traceback
 
 from database import db
 from models import Purchase
+from threading import Thread
 
 from services.lemonsqueezy_service import (
     create_checkout,
@@ -269,73 +270,45 @@ def lemonsqueezy_webhook():
 
         )
 
-        try:
+        
 
-            send_customer_receipt(
+Thread(
+    target=send_customer_receipt,
+    kwargs={
+        "customer_email": customer_email,
+        "customer_name": customer_name,
+        "receipt_number": receipt_number,
+        "product_name": product["name"],
+        "amount": amount_paid,
+        "currency": currency,
+        "purchase_date": purchase.purchase_date,
+        "download_url": download_url,
+        "downloads_remaining": purchase.max_downloads,
+        "expiry_date": purchase.token_expires,
+    },
+    daemon=True
+).start()
 
-                customer_email=customer_email,
+Thread(
+    target=send_admin_notification,
+    kwargs={
+        "receipt_number": receipt_number,
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "payment_provider": "Lemon Squeezy",
+        "provider_order_id": provider_order_id,
+        "product_name": product["name"],
+        "amount": amount_paid,
+        "currency": currency,
+        "purchase_date": purchase.purchase_date,
+    },
+    daemon=True
+).start()
 
-                customer_name=customer_name,
-
-                receipt_number=receipt_number,
-
-                product_name=product["name"],
-
-                amount=amount_paid,
-
-                currency=currency,
-
-                purchase_date=purchase.purchase_date,
-
-                download_url=download_url,
-
-                downloads_remaining=purchase.max_downloads,
-
-                expiry_date=purchase.token_expires
-
-            )
-
-        except Exception:
-
-            traceback.print_exc()
-
-        try:
-
-            send_admin_notification(
-
-                receipt_number=receipt_number,
-
-                customer_name=customer_name,
-
-                customer_email=customer_email,
-
-                payment_provider="Lemon Squeezy",
-
-                provider_order_id=provider_order_id,
-
-                product_name=product["name"],
-
-                amount=amount_paid,
-
-                currency=currency,
-
-                purchase_date=purchase.purchase_date
-
-
-            )
-
-        except Exception:
-
-            traceback.print_exc()
-
-        return jsonify({
-
-            "success": True,
-
-            "message": "Webhook processed."
-
-        })
-
+return jsonify({
+    "success": True,
+    "message": "Webhook processed."
+}), 200
     except Exception as e:
 
         db.session.rollback()
