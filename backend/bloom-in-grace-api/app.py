@@ -14,7 +14,6 @@ load_dotenv()
 
 
 def create_app():
-
     app = Flask(__name__)
 
     # --------------------------------------------------
@@ -40,8 +39,6 @@ def create_app():
         os.getenv("GMAIL_EMAIL")
     )
 
-
-
     # --------------------------------------------------
     # CORS
     # --------------------------------------------------
@@ -61,33 +58,41 @@ def create_app():
     )
 
     # --------------------------------------------------
-    # Routes
+    # Register Blueprints
     # --------------------------------------------------
 
     app.register_blueprint(products_bp)
     app.register_blueprint(downloads_bp)
     app.register_blueprint(payments_bp)
 
+    # --------------------------------------------------
+    # Routes
+    # --------------------------------------------------
+
     @app.route("/")
     def home():
-
         return {
             "message": "Bloom in Grace API running."
         }
+
+    @app.route("/version")
+    def version():
+        return {
+            "version": "31-Jul-2026"
+        }
+
+    # --------------------------------------------------
+    # Create Database Tables
+    # --------------------------------------------------
 
     with app.app_context():
         db.create_all()
 
     return app
 
-    @app.route("/version")
-    def version():
-        return {
-        "version": "2026-07-31 webhook test"
-    }
-
 
 app = create_app()
+
 
 if __name__ == "__main__":
     app.run(debug=True)
