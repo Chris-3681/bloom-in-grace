@@ -130,6 +130,7 @@ def create_lemon_checkout():
 
 @payments_bp.route("/api/lemonsqueezy/webhook", methods=["POST"])
 def lemonsqueezy_webhook():
+
     print("WEBHOOK RECEIVED")
 
     try:
@@ -155,7 +156,11 @@ def lemonsqueezy_webhook():
             }), 403
 
         payload = request.get_json()
-        print("Slug =", payload["meta"]["custom_data"]["slug"])
+
+        print(
+            "Slug =",
+            payload["meta"]["custom_data"]["slug"]
+        )
 
         event = payload["meta"]["event_name"]
 
@@ -167,7 +172,7 @@ def lemonsqueezy_webhook():
 
                 "message": "Ignored."
 
-            })
+            }), 200
 
         order = payload["data"]["attributes"]
 
@@ -218,8 +223,8 @@ def lemonsqueezy_webhook():
 
                 "message": "Already processed."
 
-            })
-            
+            }), 200
+
         receipt_number = generate_receipt_number()
 
         download_token = secrets.token_urlsafe(32)
@@ -263,52 +268,81 @@ def lemonsqueezy_webhook():
         download_url = (
 
             request.host_url.rstrip("/")
-
             + "/download/"
-
             + download_token
 
         )
 
-        
+        Thread(
 
-Thread(
-    target=send_customer_receipt,
-    kwargs={
-        "customer_email": customer_email,
-        "customer_name": customer_name,
-        "receipt_number": receipt_number,
-        "product_name": product["name"],
-        "amount": amount_paid,
-        "currency": currency,
-        "purchase_date": purchase.purchase_date,
-        "download_url": download_url,
-        "downloads_remaining": purchase.max_downloads,
-        "expiry_date": purchase.token_expires,
-    },
-    daemon=True
-).start()
+            target=send_customer_receipt,
 
-Thread(
-    target=send_admin_notification,
-    kwargs={
-        "receipt_number": receipt_number,
-        "customer_name": customer_name,
-        "customer_email": customer_email,
-        "payment_provider": "Lemon Squeezy",
-        "provider_order_id": provider_order_id,
-        "product_name": product["name"],
-        "amount": amount_paid,
-        "currency": currency,
-        "purchase_date": purchase.purchase_date,
-    },
-    daemon=True
-).start()
+            kwargs={
 
-return jsonify({
-    "success": True,
-    "message": "Webhook processed."
-}), 200
+                "customer_email": customer_email,
+
+                "customer_name": customer_name,
+
+                "receipt_number": receipt_number,
+
+                "product_name": product["name"],
+
+                "amount": amount_paid,
+
+                "currency": currency,
+
+                "purchase_date": purchase.purchase_date,
+
+                "download_url": download_url,
+
+                "downloads_remaining": purchase.max_downloads,
+
+                "expiry_date": purchase.token_expires
+
+            },
+
+            daemon=True
+
+        ).start()
+
+        Thread(
+
+            target=send_admin_notification,
+
+            kwargs={
+
+                "receipt_number": receipt_number,
+
+                "customer_name": customer_name,
+
+                "customer_email": customer_email,
+
+                "payment_provider": "Lemon Squeezy",
+
+                "provider_order_id": provider_order_id,
+
+                "product_name": product["name"],
+
+                "amount": amount_paid,
+
+                "currency": currency,
+
+                "purchase_date": purchase.purchase_date
+
+            },
+
+            daemon=True
+
+        ).start()
+
+        return jsonify({
+
+            "success": True,
+
+            "message": "Webhook processed."
+
+        }), 200
+
     except Exception as e:
 
         db.session.rollback()
