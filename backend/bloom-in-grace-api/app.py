@@ -80,6 +80,12 @@ def create_app():
 
     return app
 
+    @app.route("/version")
+    def version():
+        return {
+        "version": "2026-07-31 webhook test"
+    }
+
 
 app = create_app()
 
