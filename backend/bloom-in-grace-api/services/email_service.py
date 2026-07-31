@@ -42,12 +42,23 @@ def send_email(
         )
     )
 
-    with smtplib.SMTP(
-        SMTP_SERVER,
-        SMTP_PORT
-    ) as server:
+    print("SMTP SERVER:", SMTP_SERVER)
+    print("SMTP PORT:", SMTP_PORT)
+    print("SMTP EMAIL:", SMTP_EMAIL)
+
+    try:
+
+        server = smtplib.SMTP(
+            SMTP_SERVER,
+            int(SMTP_PORT),
+            timeout=30
+        )
+
+        server.ehlo()
 
         server.starttls()
+
+        server.ehlo()
 
         server.login(
             SMTP_EMAIL,
@@ -60,7 +71,15 @@ def send_email(
             message.as_string()
         )
 
+        server.quit()
 
+        print("Email sent successfully")
+
+
+    except Exception as e:
+
+        print("EMAIL ERROR:", str(e))
+        raise
 # ==========================================================
 # CUSTOMER RECEIPT
 # ==========================================================
