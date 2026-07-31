@@ -29,6 +29,12 @@ def send_email(
     html
 ):
 
+    print("========== EMAIL DEBUG ==========")
+    print("SMTP SERVER:", SMTP_SERVER)
+    print("SMTP PORT:", SMTP_PORT)
+    print("SMTP EMAIL:", SMTP_EMAIL)
+    print("RECIPIENT:", recipient)
+
     message = MIMEMultipart("alternative")
 
     message["Subject"] = subject
@@ -42,10 +48,6 @@ def send_email(
         )
     )
 
-    print("SMTP SERVER:", SMTP_SERVER)
-    print("SMTP PORT:", SMTP_PORT)
-    print("SMTP EMAIL:", SMTP_EMAIL)
-
     try:
 
         server = smtplib.SMTP(
@@ -54,9 +56,13 @@ def send_email(
             timeout=30
         )
 
+        print("SMTP CONNECTED")
+
         server.ehlo()
 
         server.starttls()
+
+        print("TLS STARTED")
 
         server.ehlo()
 
@@ -65,25 +71,25 @@ def send_email(
             SMTP_PASSWORD
         )
 
+        print("SMTP LOGIN SUCCESS")
+
         server.sendmail(
             SMTP_EMAIL,
             recipient,
             message.as_string()
         )
 
+        print("EMAIL SENT SUCCESSFULLY")
+
         server.quit()
 
-        print("Email sent successfully")
-
+        print("SMTP CONNECTION CLOSED")
 
     except Exception as e:
 
         print("EMAIL ERROR:", str(e))
-        raise
-# ==========================================================
-# CUSTOMER RECEIPT
-# ==========================================================
 
+        raise
 def send_customer_receipt(
 
     customer_email,
