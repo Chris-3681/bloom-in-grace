@@ -19,14 +19,15 @@ HEADERS = {
     "Authorization": f"Bearer {LEMONSQUEEZY_API_KEY}"
 }
 
-print("STORE_ID =", LEMONSQUEEZY_STORE_ID)
-print("PRODUCT =", product)
-print("VARIANT_ID =", product.get("variant_id"))
+
 # ==========================================================
 # CREATE CHECKOUT
 # ==========================================================
 
 def create_checkout(product):
+    print("STORE_ID =", LEMONSQUEEZY_STORE_ID)
+    print("PRODUCT =", product)
+    print("VARIANT_ID =", product.get("variant_id"))
 
     payload = {
 
