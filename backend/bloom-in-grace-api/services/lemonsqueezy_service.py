@@ -25,93 +25,60 @@ HEADERS = {
 # ==========================================================
 
 def create_checkout(product):
+
     print("STORE_ID =", LEMONSQUEEZY_STORE_ID)
     print("PRODUCT =", product)
     print("VARIANT_ID =", product.get("variant_id"))
 
     payload = {
-
         "data": {
-
             "type": "checkouts",
 
             "attributes": {
-
                 "checkout_data": {
-
                     "custom": {
-
                         "slug": product["slug"]
-
                     }
-
                 },
 
                 "checkout_options": {
-
                     "embed": False,
-
                     "media": True,
-
                     "logo": True
-
-                },
-
                 }
-
             },
 
             "relationships": {
-
                 "store": {
-
                     "data": {
-
                         "type": "stores",
-
-                        "id": str(product["variant_id"])
-
+                        "id": str(LEMONSQUEEZY_STORE_ID)
                     }
-
                 },
 
                 "variant": {
-
                     "data": {
-
                         "type": "variants",
-
                         "id": str(product["variant_id"])
-
                     }
-
                 }
-
             }
-
         }
-
-    
+    }
 
     response = requests.post(
-
         "https://api.lemonsqueezy.com/v1/checkouts",
-
         headers=HEADERS,
-
         json=payload,
-
         timeout=30
-
     )
 
     if not response.ok:
-                        print("Status:", response.status_code)
-                        print("Response:", response.text)
+        print("Status:", response.status_code)
+        print("Response:", response.text)
+        response.raise_for_status()
 
-                        response.raise_for_status()
-
-                        return response.json()
+    return response.json()
 
 
 # ==========================================================
@@ -121,19 +88,12 @@ def create_checkout(product):
 def verify_signature(raw_body, signature):
 
     digest = hmac.new(
-
         LEMONSQUEEZY_WEBHOOK_SECRET.encode(),
-
         raw_body,
-
         hashlib.sha256
-
     ).hexdigest()
 
     return hmac.compare_digest(
-
         digest,
-
         signature
-
     )
