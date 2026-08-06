@@ -1,21 +1,18 @@
 import os
-import smtplib
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import resend
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_EMAIL = os.getenv("SMTP_EMAIL")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+resend.api_key = os.getenv("RESEND_API_KEY")
+
+FROM_EMAIL = "onboarding@resend.dev"
+
 
 ADMIN_EMAIL = os.getenv(
     "ADMIN_EMAIL",
-    "bloomingrace.org@gmail.com"
+    "bloomingrace.ke@gmail.com"
 )
 
 
@@ -30,60 +27,25 @@ def send_email(
 ):
 
     print("========== EMAIL DEBUG ==========")
-    print("SMTP SERVER:", SMTP_SERVER)
-    print("SMTP PORT:", SMTP_PORT)
-    print("SMTP EMAIL:", SMTP_EMAIL)
+    print("FROM:", FROM_EMAIL)
     print("RECIPIENT:", recipient)
-
-    message = MIMEMultipart("alternative")
-
-    message["Subject"] = subject
-    message["From"] = SMTP_EMAIL
-    message["To"] = recipient
-
-    message.attach(
-        MIMEText(
-            html,
-            "html"
-        )
-    )
 
     try:
 
-        server = smtplib.SMTP(
-            SMTP_SERVER,
-            int(SMTP_PORT),
-            timeout=30
+        response = resend.Emails.send(
+            {
+                "from": FROM_EMAIL,
+                "to": [
+                    recipient
+                ],
+                "subject": subject,
+                "html": html
+            }
         )
 
-        print("SMTP CONNECTED")
-
-        server.ehlo()
-
-        server.starttls()
-
-        print("TLS STARTED")
-
-        server.ehlo()
-
-        server.login(
-            SMTP_EMAIL,
-            SMTP_PASSWORD
-        )
-
-        print("SMTP LOGIN SUCCESS")
-
-        server.sendmail(
-            SMTP_EMAIL,
-            recipient,
-            message.as_string()
-        )
-
+        print("RESEND RESPONSE:", response)
         print("EMAIL SENT SUCCESSFULLY")
 
-        server.quit()
-
-        print("SMTP CONNECTION CLOSED")
 
     except Exception as e:
 
@@ -444,15 +406,6 @@ def send_admin_notification(
 
     """
 
-    send_email(
-
-        ADMIN_EMAIL,
-
-        f"New Order • {receipt_number}",
-
-        html
-
-    )
     send_email(
 
         ADMIN_EMAIL,
