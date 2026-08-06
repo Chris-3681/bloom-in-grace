@@ -45,8 +45,10 @@ def create_app():
 
     FRONTEND_URLS = os.getenv(
         "FRONTEND_URLS",
-        "http://localhost:5173"
-    )
+        ""
+    ).split(",")
+    
+    print("ALLOWED FRONTENDS:", FRONTEND_URLS)
 
     CORS(
         app,
