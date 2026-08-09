@@ -175,6 +175,10 @@ def lemonsqueezy_webhook():
             }), 200
 
         order = payload["data"]["attributes"]
+        
+        print("========== LEMON SQUEEZY ORDER DATA ==========")
+        print(order)
+        print("==============================================")
 
         customer_name = order.get(
             "user_name",
