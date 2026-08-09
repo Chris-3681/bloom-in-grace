@@ -7,7 +7,10 @@ load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
-FROM_EMAIL = "onboarding@resend.dev"
+FROM_EMAIL = os.getenv(
+    "FROM_EMAIL",
+    "hello@bloomingrace.org"
+)
 
 
 ADMIN_EMAIL = os.getenv(
