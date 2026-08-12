@@ -202,6 +202,12 @@ def lemonsqueezy_webhook():
 
         order = payload["data"]["attributes"]
         
+        print("========== FULL WEBHOOK DEBUG ==========")
+        print("CUSTOM DATA =", payload["meta"].get("custom_data"))
+        print("ORDER USER NAME =", order.get("user_name"))
+        print("ORDER USER EMAIL =", order.get("user_email"))
+        print("========================================")
+        
         custom_data = payload["meta"].get("custom_data", {})
 
         customer_name = custom_data.get("customer_name")
