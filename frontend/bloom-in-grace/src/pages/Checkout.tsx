@@ -7,6 +7,7 @@ import { products } from "../data/products";
 function Checkout() {
   const { slug } = useParams();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
   const product = products.find(
@@ -15,12 +16,12 @@ function Checkout() {
 
   if (!product) {
     return (
-      <Layout>
-        <div className="max-w-4xl mx-auto py-20 px-6">
-          <h1 className="text-4xl font-bold">
+    <Layout>
+    <div className="max-w-4xl mx-auto py-20 px-6">
+            <h1 className="text-4xl font-bold">
             Product Not Found
           </h1>
-        </div>
+    </div>
       </Layout>
     );
   }
@@ -65,7 +66,23 @@ function Checkout() {
 
         <div className="mt-8">
 
+          {/* NAME */}
+
           <label className="block text-sm font-medium text-[#4A3F35] mb-2">
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-lg border border-[#D8CFC4] px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C9A66B]"
+          />
+
+          {/* EMAIL */}
+
+          <label className="block text-sm font-medium text-[#4A3F35] mb-2 mt-6">
             Email Address
           </label>
 
@@ -85,10 +102,11 @@ function Checkout() {
 
         <div className="mt-10">
 
-        <LemonCheckoutButton
-    slug={product.slug}
-    email={email}
-/>
+          <LemonCheckoutButton
+            slug={product.slug}
+            name={name}
+            email={email}
+          />
 
         </div>
 

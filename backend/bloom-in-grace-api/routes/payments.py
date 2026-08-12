@@ -76,6 +76,8 @@ def create_lemon_checkout():
         data = request.get_json()
 
         slug = data.get("slug")
+        customer_name = data.get("name", "").strip()
+        customer_email = data.get("email", "").strip()
 
         if not slug:
 
@@ -84,6 +86,26 @@ def create_lemon_checkout():
                 "success": False,
 
                 "error": "Missing product slug."
+
+            }), 400
+
+        if not customer_name:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "Missing customer name."
+
+            }), 400
+
+        if not customer_email:
+
+            return jsonify({
+
+                "success": False,
+
+                "error": "Missing customer email."
 
             }), 400
 
@@ -99,7 +121,11 @@ def create_lemon_checkout():
 
             }), 404
 
-        checkout = create_checkout(product)
+        checkout = create_checkout(
+            product,
+            customer_name,
+            customer_email
+        )
 
         checkout_url = checkout["data"]["attributes"]["url"]
 

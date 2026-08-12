@@ -24,7 +24,11 @@ HEADERS = {
 # CREATE CHECKOUT
 # ==========================================================
 
-def create_checkout(product):
+def create_checkout(
+    product,
+    customer_name,
+    customer_email
+):
 
     print("STORE_ID =", LEMONSQUEEZY_STORE_ID)
     print("PRODUCT =", product)
@@ -36,10 +40,12 @@ def create_checkout(product):
 
             "attributes": {
                 "checkout_data": {
-                    "custom": {
-                        "slug": product["slug"]
-                    }
-                },
+    "name": customer_name,
+    "email": customer_email,
+    "custom": {
+        "slug": product["slug"]
+    }
+},
 
                 "checkout_options": {
                     "embed": False,
