@@ -202,7 +202,12 @@ def lemonsqueezy_webhook():
 
         order = payload["data"]["attributes"]
         
-        customer_name = order.get("user_name")
+        custom_data = payload["meta"].get("custom_data", {})
+
+        customer_name = custom_data.get("customer_name")
+
+        if not customer_name:
+            customer_name = order.get("user_name")
 
         if not customer_name or customer_name == "Bloom in Grace":
             customer_name = "Customer"
