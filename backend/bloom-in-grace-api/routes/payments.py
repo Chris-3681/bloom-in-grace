@@ -176,14 +176,10 @@ def lemonsqueezy_webhook():
 
         order = payload["data"]["attributes"]
         
-        print("========== LEMON SQUEEZY ORDER DATA ==========")
-        print(order)
-        print("==============================================")
+        customer_name = order.get("user_name")
 
-        customer_name = order.get(
-            "user_name",
-            "Customer"
-        )
+        if not customer_name or customer_name == "Bloom in Grace":
+            customer_name = "Customer"
 
         customer_email = order.get(
             "user_email"
