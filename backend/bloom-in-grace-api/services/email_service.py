@@ -9,7 +9,7 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 
 FROM_EMAIL = os.getenv(
     "FROM_EMAIL",
-    "hello@bloomingrace.org"
+    "orders@bloomingrace.org"
 )
 
 
@@ -41,6 +41,7 @@ def send_email(
                 "to": [
                     recipient
                 ],
+                "reply_to": "bloomingrace.ke@gmail.com",
                 "subject": subject,
                 "html": html
             }
