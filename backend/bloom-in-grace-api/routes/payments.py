@@ -129,13 +129,14 @@ def create_lemon_checkout():
 
         checkout_url = checkout["data"]["attributes"]["url"]
 
-        return jsonify({
+        result = response.json()
 
-            "success": True,
+        print("========== LEMON CHECKOUT RESPONSE ==========")
+        print("CHECKOUT DATA =", result["data"]["attributes"].get("checkout_data"))
+        print("CHECKOUT URL =", result["data"]["attributes"].get("url"))
+        print("=============================================")
 
-            "checkout_url": checkout_url
-
-        })
+        return result
 
     except Exception as e:
 
