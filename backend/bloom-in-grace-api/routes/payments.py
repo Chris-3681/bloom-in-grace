@@ -80,45 +80,29 @@ def create_lemon_checkout():
         customer_email = data.get("email", "").strip()
 
         if not slug:
-
             return jsonify({
-
                 "success": False,
-
                 "error": "Missing product slug."
-
             }), 400
 
         if not customer_name:
-
             return jsonify({
-
                 "success": False,
-
                 "error": "Missing customer name."
-
             }), 400
 
         if not customer_email:
-
             return jsonify({
-
                 "success": False,
-
                 "error": "Missing customer email."
-
             }), 400
 
         product = get_product(slug)
 
         if not product:
-
             return jsonify({
-
                 "success": False,
-
                 "error": "Product not found."
-
             }), 404
 
         checkout = create_checkout(
@@ -129,28 +113,19 @@ def create_lemon_checkout():
 
         checkout_url = checkout["data"]["attributes"]["url"]
 
-        result = response.json()
-
-        print("========== LEMON CHECKOUT RESPONSE ==========")
-        print("CHECKOUT DATA =", result["data"]["attributes"].get("checkout_data"))
-        print("CHECKOUT URL =", result["data"]["attributes"].get("url"))
-        print("=============================================")
-
-        return result
+        return jsonify({
+            "success": True,
+            "checkout_url": checkout_url
+        })
 
     except Exception as e:
 
         traceback.print_exc()
 
         return jsonify({
-
             "success": False,
-
             "error": str(e)
-
         }), 500
-
-
 # ==========================================================
 # LEMON SQUEEZY WEBHOOK
 # ==========================================================
