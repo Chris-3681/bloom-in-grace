@@ -1,3 +1,4 @@
+from itertools import product
 import os
 import hmac
 import hashlib
@@ -33,6 +34,13 @@ def create_checkout(
     print("STORE_ID =", LEMONSQUEEZY_STORE_ID)
     print("PRODUCT =", product)
     print("VARIANT_ID =", product.get("variant_id"))
+    
+    print("CHECKOUT CUSTOMER NAME =", customer_name)
+    print("CHECKOUT CUSTOMER EMAIL =", customer_email)
+    print("CHECKOUT CUSTOM DATA =", {
+    "slug": product["slug"],
+    "customer_name": customer_name
+})
 
     payload = {
         "data": {

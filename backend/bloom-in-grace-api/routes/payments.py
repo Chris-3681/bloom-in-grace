@@ -130,7 +130,10 @@ def create_lemon_checkout():
 # LEMON SQUEEZY WEBHOOK
 # ==========================================================
 
-@payments_bp.route("/api/lemonsqueezy/webhook", methods=["POST"])
+@payments_bp.route(
+    "/api/lemonsqueezy/webhook",
+    methods=["POST"]
+)
 def lemonsqueezy_webhook():
 
     print("WEBHOOK RECEIVED")
@@ -150,120 +153,141 @@ def lemonsqueezy_webhook():
         ):
 
             return jsonify({
-
                 "success": False,
-
                 "error": "Invalid signature."
-
             }), 403
 
         payload = request.get_json()
 
-        print(
-            "Slug =",
-            payload["meta"]["custom_data"]["slug"]
+        # ==================================================
+        # WEBHOOK DATA
+        # ==================================================
+
+        custom_data = payload["meta"].get(
+            "custom_data",
+            {}
         )
 
-        event = payload["meta"]["event_name"]
+        print(
+            "Slug =",
+            custom_data.get("slug")
+        )
+
+        event = payload["meta"].get(
+            "event_name"
+        )
 
         if event != "order_created":
 
             return jsonify({
-
                 "success": True,
-
                 "message": "Ignored."
-
             }), 200
 
         order = payload["data"]["attributes"]
 
-custom_data = payload["meta"].get(
-    "custom_data",
-    {}
-)
+        # ==================================================
+        # CUSTOMER DATA
+        # ==================================================
 
-customer_name = custom_data.get(
-    "customer_name"
-)
+        customer_name = custom_data.get(
+            "customer_name"
+        )
 
-customer_email = order.get(
-    "user_email"
-)
+        customer_email = order.get(
+            "user_email"
+        )
 
-print("========== CUSTOMER DATA ==========")
-print("CUSTOMER NAME =", customer_name)
-print("CUSTOMER EMAIL =", customer_email)
-print("===================================")
+        print("========== CUSTOMER DATA ==========")
+        print(
+            "CUSTOM DATA =",
+            custom_data
+        )
+        print(
+            "CUSTOMER NAME =",
+            customer_name
+        )
+        print(
+            "ORDER USER NAME =",
+            order.get("user_name")
+        )
+        print(
+            "CUSTOMER EMAIL =",
+            customer_email
+        )
+        print("===================================")
 
-if not customer_name:
-    customer_name = order.get(
-        "user_name",
-        "Customer"
-    )
+        # Fallback if custom_data does not contain the name
+        if not customer_name:
 
-if not customer_name or customer_name == "Bloom in Grace":
-    customer_name = "Customer"
-        
-        
-        
-        
-        
-        
-        
-        
+            customer_name = order.get(
+                "user_name"
+            )
 
-        
+        # Final fallback
+        if (
+            not customer_name
+            or customer_name == "Bloom in Grace"
+        ):
 
-        
-            
+            customer_name = "Customer"
 
-        
-            
-
-        
-            
-        
+        # ==================================================
+        # ORDER DATA
+        # ==================================================
 
         provider_order_id = str(
             payload["data"]["id"]
         )
 
-        amount_paid = float(
-            order["total"]
-        ) / 100
+        amount_paid = (
+            float(order["total"]) / 100
+        )
 
         currency = order["currency"]
 
-        slug = payload["meta"]["custom_data"]["slug"]
+        slug = custom_data.get(
+            "slug"
+        )
+
+        if not slug:
+
+            return jsonify({
+                "success": False,
+                "error": "Missing product slug."
+            }), 400
+
+        # ==================================================
+        # PRODUCT
+        # ==================================================
 
         product = get_product(slug)
 
         if not product:
 
             return jsonify({
-
                 "success": False,
-
                 "error": "Unknown product."
-
             }), 404
 
+        # ==================================================
+        # PREVENT DUPLICATE ORDERS
+        # ==================================================
+
         existing = Purchase.query.filter_by(
-
             provider_order_id=provider_order_id
-
         ).first()
 
         if existing:
 
             return jsonify({
-
                 "success": True,
-
                 "message": "Already processed."
-
             }), 200
+
+        # ==================================================
+        # CREATE PURCHASE
+        # ==================================================
 
         receipt_number = generate_receipt_number()
 
@@ -293,7 +317,10 @@ if not customer_name or customer_name == "Bloom in Grace":
 
             purchase_date=datetime.utcnow(),
 
-            token_expires=datetime.utcnow() + timedelta(days=7),
+            token_expires=(
+                datetime.utcnow()
+                + timedelta(days=7)
+            ),
 
             download_count=0,
 
@@ -305,6 +332,10 @@ if not customer_name or customer_name == "Bloom in Grace":
 
         db.session.commit()
 
+        # ==================================================
+        # DOWNLOAD URL
+        # ==================================================
+
         download_url = (
 
             request.host_url.rstrip("/")
@@ -312,6 +343,10 @@ if not customer_name or customer_name == "Bloom in Grace":
             + download_token
 
         )
+
+        # ==================================================
+        # CUSTOMER RECEIPT
+        # ==================================================
 
         Thread(
 
@@ -335,15 +370,23 @@ if not customer_name or customer_name == "Bloom in Grace":
 
                 "download_url": download_url,
 
-                "downloads_remaining": purchase.max_downloads,
+                "downloads_remaining": (
+                    purchase.max_downloads
+                ),
 
-                "expiry_date": purchase.token_expires
+                "expiry_date": (
+                    purchase.token_expires
+                )
 
             },
 
             daemon=True
 
         ).start()
+
+        # ==================================================
+        # ADMIN NOTIFICATION
+        # ==================================================
 
         Thread(
 
@@ -357,9 +400,13 @@ if not customer_name or customer_name == "Bloom in Grace":
 
                 "customer_email": customer_email,
 
-                "payment_provider": "Lemon Squeezy",
+                "payment_provider": (
+                    "Lemon Squeezy"
+                ),
 
-                "provider_order_id": provider_order_id,
+                "provider_order_id": (
+                    provider_order_id
+                ),
 
                 "product_name": product["name"],
 
@@ -367,7 +414,9 @@ if not customer_name or customer_name == "Bloom in Grace":
 
                 "currency": currency,
 
-                "purchase_date": purchase.purchase_date
+                "purchase_date": (
+                    purchase.purchase_date
+                )
 
             },
 
