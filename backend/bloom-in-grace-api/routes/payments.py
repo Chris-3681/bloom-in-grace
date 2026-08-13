@@ -177,26 +177,53 @@ def lemonsqueezy_webhook():
             }), 200
 
         order = payload["data"]["attributes"]
+
+custom_data = payload["meta"].get(
+    "custom_data",
+    {}
+)
+
+customer_name = custom_data.get(
+    "customer_name"
+)
+
+customer_email = order.get(
+    "user_email"
+)
+
+print("========== CUSTOMER DATA ==========")
+print("CUSTOMER NAME =", customer_name)
+print("CUSTOMER EMAIL =", customer_email)
+print("===================================")
+
+if not customer_name:
+    customer_name = order.get(
+        "user_name",
+        "Customer"
+    )
+
+if not customer_name or customer_name == "Bloom in Grace":
+    customer_name = "Customer"
         
-        print("========== FULL WEBHOOK DEBUG ==========")
-        print("CUSTOM DATA =", payload["meta"].get("custom_data"))
-        print("ORDER USER NAME =", order.get("user_name"))
-        print("ORDER USER EMAIL =", order.get("user_email"))
-        print("========================================")
         
-        custom_data = payload["meta"].get("custom_data", {})
+        
+        
+        
+        
+        
+        
 
-        customer_name = custom_data.get("customer_name")
+        
 
-        if not customer_name:
-            customer_name = order.get("user_name")
+        
+            
 
-        if not customer_name or customer_name == "Bloom in Grace":
-            customer_name = "Customer"
+        
+            
 
-        customer_email = order.get(
-            "user_email"
-        )
+        
+            
+        
 
         provider_order_id = str(
             payload["data"]["id"]

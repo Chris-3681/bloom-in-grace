@@ -39,13 +39,18 @@ def create_checkout(
             "type": "checkouts",
 
             "attributes": {
+
                 "checkout_data": {
-    "name": customer_name,
-    "email": customer_email,
-    "custom": {
-        "slug": product["slug"]
-    }
-},
+
+                    "email": customer_email,
+
+                    "name": customer_name,
+
+                    "custom": {
+                        "slug": product["slug"],
+                        "customer_name": customer_name
+                    }
+                },
 
                 "checkout_options": {
                     "embed": False,
@@ -55,6 +60,7 @@ def create_checkout(
             },
 
             "relationships": {
+
                 "store": {
                     "data": {
                         "type": "stores",
