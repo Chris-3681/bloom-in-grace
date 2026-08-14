@@ -337,12 +337,9 @@ def lemonsqueezy_webhook():
         # ==================================================
 
         download_url = (
-
-            request.host_url.rstrip("/")
-            + "/download/"
-            + download_token
-
-        )
+    "https://bloomingrace.org/download/"
+    + download_token
+)
 
         # ==================================================
         # CUSTOMER RECEIPT

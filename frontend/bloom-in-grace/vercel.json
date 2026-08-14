@@ -1,6 +1,12 @@
 {
-"rewrites": [
-{ "source": "/(.*)", "destination": "/index.html" } ]
+    "rewrites": [
+    {
+        "source": "/download/:token",
+        "destination": "https://bloom-in-grace.onrender.com/download/:token"
+    },
+    {
+        "source": "/(.*)",
+        "destination": "/index.html"
+    }
+    ]
 }
-
-
